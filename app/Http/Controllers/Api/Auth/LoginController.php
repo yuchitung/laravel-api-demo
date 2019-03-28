@@ -2,38 +2,24 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\UserLoginRequest;
 use Illuminate\Http\Response;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Http\Exception\HttpResponseException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use App\Http\Controllers\Controller;
-use App\Entities\User;
 
 class LoginController extends Controller
 {
     /**
      * Handle a login request to the application.
      *
-     * @param \Illuminate\Http\Request $request
-     *
-     * @return \Illuminate\Http\Response
+     * @param App\Http\Requests\UserLoginRequest
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function login(Request $request)
+    public function login(UserLoginRequest $request)
     {
-        try {
-            $this->validate($request, [
-                'email' => 'required|email|max:255',
-                'password' => 'required',
-            ]);
-        } catch (ValidationException $e) {
-            return $e->getResponse();
-        }
-
         /**
-         *  Attempt to verify the credentials and create a token for the user
+         *  Verify the credentials and create a token for the user
          */
         try {
             if (!$token = JWTAuth::attempt(
@@ -42,46 +28,45 @@ class LoginController extends Controller
                 return $this->onUnauthorized();
             }
         } catch (JWTException $e) {
-            // Something went wrong whilst attempting to encode the token
+            
             return $this->onJwtGenerationError();
         }
 
-        // All good so return the token
         return $this->onAuthorized($token);
     }
 
     /**
-     * What response should be returned on invalid credentials.
+     * Unauthorized
      *
-     * @return JsonResponse
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function onUnauthorized()
     {
-        return new JsonResponse([
+        return response()->json([
             'message' => 'invalid_credentials'
         ], Response::HTTP_UNAUTHORIZED);
     }
 
     /**
-     * What response should be returned on error while generate JWT.
+     * Can not generate a token
      *
-     * @return JsonResponse
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function onJwtGenerationError()
     {
-        return new JsonResponse([
+        return response()->json([
             'message' => 'could_not_create_token'
         ], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     /**
-     * What response should be returned on authorized.
+     * Authorized
      *
-     * @return JsonResponse
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function onAuthorized($token)
     {
-        return new JsonResponse([
+        return response()->json([
             'message' => 'token_generated',
             'data' => [
                 'token' => $token,
@@ -90,21 +75,20 @@ class LoginController extends Controller
     }
 
     /**
-     * Get the needed authorization credentials from the request.
+     * Get the needed authorization credentials from the request
      *
-     * @param \Illuminate\Http\Request $request
-     *
+     * @param App\Http\Requests\UserLoginRequest
      * @return array
      */
-    protected function getCredentials(Request $request)
+    protected function getCredentials(UserLoginRequest $request)
     {
         return $request->only('email', 'password');
     }
 
     /**
-     * Invalidate a token.
+     * Invalidate a token
      *
-     * @return \Illuminate\Http\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function deleteInvalidate()
     {
@@ -112,13 +96,13 @@ class LoginController extends Controller
 
         $token->invalidate();
 
-        return new JsonResponse(['message' => 'token_invalidated']);
+        return response()->json(['message' => 'token_invalidated']);
     }
 
     /**
-     * Refresh a token.
+     * Refresh a token
      *
-     * @return \Illuminate\Http\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function patchRefresh()
     {
@@ -126,7 +110,7 @@ class LoginController extends Controller
 
         $newToken = $token->refresh();
 
-        return new JsonResponse([
+        return response()->json([
             'message' => 'token_refreshed',
             'data' => [
                 'token' => $newToken
@@ -135,13 +119,13 @@ class LoginController extends Controller
     }
 
     /**
-     * Get authenticated user.
+     * Get authenticated user
      *
-     * @return \Illuminate\Http\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function getUser()
     {
-        return new JsonResponse([
+        return response()->json([
             'message' => 'authenticated_user',
             'data' => JWTAuth::parseToken()->authenticate()
         ]);

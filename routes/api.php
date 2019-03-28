@@ -24,6 +24,7 @@ $api->version('v1', function ($api) {
 
         $api->group(['namespace' => 'Auth'], function () use ($api) {
             $api->post('auth/register', 'RegisterController@register');
+            $api->post('auth/login', 'LoginController@login');
         });
 
     });
