@@ -27,5 +27,26 @@ $api->version('v1', function ($api) {
             $api->post('auth/login', 'LoginController@login');
         });
 
+        $api->group(['middleware' => 'api.auth'], function ($api) {
+            /**
+             * Get a book
+             */
+            $api->get('/books/{id}', 'BooksController@show');
+
+            /**
+             * Create a book
+             */
+            $api->post('/books', 'BooksController@store');
+
+            /**
+             * Update a book
+             */
+            $api->patch('/books/{id}', 'BooksController@update');
+
+            /**
+             * Delete a book
+             */
+            $api->delete('/books/{id}', 'BooksController@destroy');
+        });
     });
 });
