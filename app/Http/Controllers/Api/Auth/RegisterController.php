@@ -6,7 +6,7 @@ use App\Http\Requests\UserCreateRequest;
 use App\Http\Controllers\Controller;
 use App\Repositories\UserRepository;
 use Prettus\Validator\Exceptions\ValidatorException;
-use Throwable;
+use \Throwable;
 
 class RegisterController extends Controller
 {
