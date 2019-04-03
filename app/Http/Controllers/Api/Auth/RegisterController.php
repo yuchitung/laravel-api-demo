@@ -18,30 +18,26 @@ class RegisterController extends Controller
      * @param UserRepository 
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function register(UserCreateRequest $request,UserRepository $repository)
+    public function register(UserCreateRequest $request, UserRepository $repository)
     {
-        try{
-        
-        $user = $repository->create([
-            'name' => $request->input('name'),
-            'email' => $request->input('email'),
-            'password' =>app('hash')->make($request->input('password'))
-        ]);
+        try {
 
-        return response()->json([
-            'message' => 'Success',
-            'data' => $user
-        ]);
+            $user = $repository->create([
+                'name' => $request->input('name'),
+                'email' => $request->input('email'),
+                'password' => app('hash')->make($request->input('password'))
+            ]);
 
+            return response()->json([
+                'message' => 'Success',
+                'data' => $user
+            ]);
         } catch (ValidatorException $e) {
-        
-            return response()->json(['error' => 'validation exception'], 500);
 
+            return response()->json(['error' => 'validation exception'], 500);
         } catch (Throwable $e) {
-        
+
             return response()->json(['errors' => 'Error'], 500);
         }
-
     }
-
 }
